@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,42 +30,45 @@ import com.pjsoft.fakestoreapp.ui.theme.FakeStoreAppTheme
 @Composable
 fun ProductCard(
     product: Product,
-    onClick : () -> Unit
-){
-    Row(
+    onClick: () -> Unit
+) {
+    Card(
         modifier = Modifier
             .padding(10.dp)
             .fillMaxWidth()
-            .height(100.dp)
-            .clip(CircleShape)
-            .background(Color.Cyan)
-            .padding(10.dp)
-            .clickable{
-                onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onClick() },
+        elevation = CardDefaults.cardElevation(6.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        AsyncImage(
-            model = product.image,
-            contentDescription = product.title,
-            modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(Color.White),
-            contentScale = ContentScale.Crop
-        )
-        Column(
-            modifier = Modifier
-                .padding(start = 10.dp)
-                .weight(1f)
+        Row(
+            modifier = Modifier.padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(product.title)
-            Text(product.category)
-
+            AsyncImage(
+                model = product.image,
+                contentDescription = product.title,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+            Column(
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .weight(1f)
+            ) {
+                Text(product.title, style = MaterialTheme.typography.titleMedium)
+                Text(product.category, style = MaterialTheme.typography.bodySmall)
+            }
+            Text(
+                text = "$${product.price}",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
-        Text("$${product.price}")
     }
 }
+
 
 @Preview
 @Composable

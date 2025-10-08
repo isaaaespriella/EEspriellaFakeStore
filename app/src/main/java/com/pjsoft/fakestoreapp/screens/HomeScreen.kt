@@ -3,9 +3,11 @@ package com.pjsoft.fakestoreapp.screens
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,62 +33,48 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 @Composable
-fun HomeScreen(
-    navController: NavController
-){
-    /*
-    * */
-    var products by remember {
-        mutableStateOf(listOf<Product>())
-    }
-    var loading by remember {
-        mutableStateOf(true)
-    }
-    LaunchedEffect(true) {
-        try{
-            // 1. Crear una instancia de RETROFIT!!! CREATE BUILDER
-            val retrofit = Retrofit
-                .Builder()
+fun HomeScreen(navController: NavController) {
+    var products by remember { mutableStateOf(listOf<Product>()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val retrofit = Retrofit.Builder()
                 .baseUrl("https://fakestoreapi.com/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
+
             val service = retrofit.create(ProductService::class.java)
-            val result = async(Dispatchers.IO) {
-                service.getAllProducts()
-            }
-            Log.i("HomeScreen","${result.await()}")
+            val result = async(Dispatchers.IO) { service.getAllProducts() }
             products = result.await()
             loading = false
-        }
-        catch (e: Exception){
+        } catch (e: Exception) {
             loading = false
-            Log.e("HomeScreen",e.toString())
         }
     }
 
-    if(loading){
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
-        }
-    }
-    else{
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(products){ product ->
-                ProductCard(
-                    product = product,
-                    onClick = {
-                        navController.navigate(ProductDetailScreenRoute(product.id))
+    Scaffold(
+        topBar = { FakeStoreTopBar("Fake Store") }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                LazyColumn {
+                    items(products) { product ->
+                        ProductCard(
+                            product = product,
+                            onClick = {
+                                navController.navigate(ProductDetailScreenRoute(product.id))
+                            }
+                        )
                     }
-                )
+                }
             }
         }
     }
 }
+
 
 @Preview
 @Composable
